@@ -1,0 +1,229 @@
+/* ------------------ Project Page Styles ------------------ */
+
+.project-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1.5rem 0;
+}
+
+.project-filters button {
+  margin: 0 6px;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: #f3e5f5;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #B067F9;
+  transition: 0.2s ease-in-out;
+}
+
+.project-filters button:hover {
+  background: #ddd;
+}
+
+.project-filters .active-filter {
+  background: #7455D4;
+  color: white;
+}
+
+/* Project Card Section */
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.section-header .add-btn {
+  background-color: #663399;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.section-header .add-btn:hover {
+  background-color: #5f3ecb;
+}
+
+/* Project List */
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.project-item {
+  background: #fff;
+  padding: 1.2rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.project-item h3 {
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0;
+}
+
+.project-item p {
+  margin: 0.3rem 0 0;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* Actions */
+.project-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.project-actions button {
+  border: none;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.project-actions .view-btn {
+  background-color: #0984e3;
+  color: white;
+}
+
+.project-actions .edit-btn {
+  background-color: #fdcb6e;
+  color: #333;
+}
+
+.project-actions .delete-btn {
+  background-color: #d63031;
+  color: white;
+}
+
+.project-actions button:hover {
+  opacity: 0.9;
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: #00000099;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal h3 {
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.modal input {
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.3rem 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+/* Buttons inside table */
+.action-btn {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background-color 0.2s ease;
+}
+
+/* Edit button - yellow */
+.action-btn.edit {
+  background-color: #fcd34d;
+  color: #333;
+}
+
+.action-btn.edit:hover {
+  background-color: #fbbf24;
+}
+
+/* Delete button - red */
+.action-btn.delete {
+  background-color: #ef4444;
+  color: white;
+}
+
+.action-btn.delete:hover {
+  background-color: #dc2626;
+}

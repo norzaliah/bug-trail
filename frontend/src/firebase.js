@@ -1,13 +1,13 @@
-import { 
-  initializeApp 
-} from 'firebase/app';
-import { 
-  getAuth, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
+// firebase.js
+import { initializeApp } from 'firebase/app';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
   signOut,
-  signInWithEmailAndPassword // Add this
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore'; // ✅ Firestore added
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -20,9 +20,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app); // ✅ Create Firestore instance
 const googleProvider = new GoogleAuthProvider();
 
-// Add email/password login function
+// Email/password login
 const signInWithEmailPassword = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -33,7 +34,7 @@ const signInWithEmailPassword = async (email, password) => {
   }
 };
 
-// Sign in with Google
+// Google login
 const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -44,14 +45,15 @@ const signInWithGoogle = async () => {
   }
 };
 
-// Sign out
+// Logout
 const logout = () => {
   signOut(auth);
 };
 
-export { 
-  auth, 
-  signInWithGoogle, 
-  signInWithEmailPassword, // Export the new function
-  logout 
+export {
+  auth,
+  db,                      // ✅ Export Firestore
+  signInWithGoogle,
+  signInWithEmailPassword,
+  logout
 };

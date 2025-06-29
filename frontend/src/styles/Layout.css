@@ -1,0 +1,16 @@
+/* Layout.css */
+.layout-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.layout-content {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  padding: 0; /* Removed to avoid double spacing */
+  box-sizing: border-box;
+}

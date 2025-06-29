@@ -1,0 +1,157 @@
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(137deg, #F4BA80, #CC80F6);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.auth-card {
+  background-color: #ffffff90;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 550px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.logo {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4C4BD7;
+}
+
+.logo span {
+  color: #4C4BD7;
+}
+
+.tab {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin: 1rem 0;
+  cursor: pointer;
+}
+
+.tab span {
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding-bottom: 4px;
+  padding: 1rem 3rem 0.5rem 3rem;
+}
+
+.tab .active {
+  border-bottom: 3.5px solid #7455D4;
+  color: #000000;
+}
+
+.tab .inactive {
+  color: #585555;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  font-weight: 600;
+  color: #444;
+}
+
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 1rem;
+}
+
+input:focus {
+  border-color: #9C27B0;
+}
+
+.password-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot {
+  font-size: 0.8rem;
+  color: #FD3A2D;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.login-btn,
+.google-btn {
+  padding: 0.7rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.login-btn {
+  margin-top: 1rem;
+  background-color: #7455D4;
+  color: white;
+}
+
+.login-btn:hover {
+  background-color: #7455D4;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid #ddd;
+  background-color: white;
+}
+
+.google-btn:hover {
+  background-color: #f2f2f2;
+}
+
+.google-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.or {
+  text-align: center;
+  margin: 0.8rem 0;
+  font-weight: 500;
+  color: #aaa;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.5rem 1.8rem;
+  }
+
+  .tab {
+    gap: 1rem;
+  }
+}
+
+.select-role {
+  margin-top: 1rem;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1.5rem;
+}
+
+.signup-btn {
+  margin-top: 1rem;
+}
