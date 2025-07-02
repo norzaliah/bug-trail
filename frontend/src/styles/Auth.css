@@ -1,4 +1,3 @@
-
 .auth-wrapper {
   min-height: 100vh;
   display: flex;
@@ -154,4 +153,9 @@ input:focus {
 
 .signup-btn {
   margin-top: 1rem;
+}
+
+.signup-btn:hover {
+  background-color: #7455D4;
+  color: white;
 }

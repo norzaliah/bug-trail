@@ -17,7 +17,6 @@ export default function Navbar() {
         <NavLink to="/bugs" className={({ isActive }) => isActive ? 'active-link' : ''}>🐛 My Bugs</NavLink>
         <NavLink to="/projects" className={({ isActive }) => isActive ? 'active-link' : ''}>📁 Projects</NavLink>
         <NavLink to="/calendar" className={({ isActive }) => isActive ? 'active-link' : ''}>📅 Calendar</NavLink>
-        <NavLink to="/discuss" className={({ isActive }) => isActive ? 'active-link' : ''}>💬 Discuss</NavLink>
         <NavLink to="/settings" className={({ isActive }) => isActive ? 'active-link' : ''}>⚙️ Settings</NavLink>
       </nav>
 
