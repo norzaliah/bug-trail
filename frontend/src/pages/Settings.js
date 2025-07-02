@@ -1,15 +1,18 @@
-// frontend/pages/Settings.jsx
+// src/pages/Settings.jsx
 import React, { useState, useEffect } from 'react';
 import '../styles/Settings.css';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import { db } from '../firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { currentUser, userProfile } = useAuth();
+  const [editing, setEditing] = useState(false);
+
   const [profile, setProfile] = useState({
     name: '',
     role: '',
@@ -18,36 +21,41 @@ export default function Settings() {
     address: '',
     social: '',
   });
-  const [editing, setEditing] = useState(false);
 
   const [notifications, setNotifications] = useState({
     events: true,
     forumMessages: true,
     newDocs: true,
-    timeLogsRejected: false,
+    timeLogsRejected: true,
   });
 
   const [allowances, setAllowances] = useState({
     seeProject: true,
-    updateProject: false,
-    copySchedule: false,
+    updateProject: true,
+    copySchedule: true,
   });
 
   const usedStorage = 7;
   const totalStorage = 10;
 
+  // Load user profile from context
   useEffect(() => {
-    if (user) {
+    if (userProfile) {
       setProfile({
-        name: user.name,
-        role: user.role,
-        email: user.email,
-        phone: user.phone || '',
-        address: user.address || '',
-        social: user.social || '',
+        name: userProfile.name,
+        role: userProfile.role,
+        email: userProfile.email,
+        phone: userProfile.phone || '',
+        address: userProfile.address || '',
+        social: userProfile.social || '',
       });
+
+      // Load preferences if stored in profile
+      setNotifications((prev) => userProfile.notifications || prev);
+      setAllowances((prev) => userProfile.allowances || prev);
+
     }
-  }, [user]);
+  }, [userProfile]);
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -56,7 +64,8 @@ export default function Settings() {
 
   const handleSaveProfile = async () => {
     try {
-      await api.put(`/users/${user.id}`, profile);
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, { ...profile });
       alert('Profile updated successfully!');
       setEditing(false);
     } catch (err) {
@@ -65,17 +74,21 @@ export default function Settings() {
     }
   };
 
-  const handleToggle = (section, field) => {
+  const handleToggle = (section, key) => {
     if (section === 'notifications') {
-      setNotifications((prev) => ({ ...prev, [field]: !prev[field] }));
+      setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
     } else {
-      setAllowances((prev) => ({ ...prev, [field]: !prev[field] }));
+      setAllowances((prev) => ({ ...prev, [key]: !prev[key] }));
     }
   };
 
   const handleSaveSettings = async () => {
     try {
-      await api.put(`/users/${user.id}/settings`, { notifications, allowances });
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        notifications,
+        allowances,
+      });
       alert('Settings saved successfully!');
     } catch (err) {
       console.error('Failed to save settings:', err);
@@ -88,7 +101,7 @@ export default function Settings() {
     datasets: [
       {
         data: [usedStorage, totalStorage - usedStorage],
-        backgroundColor: ['#663399', '#ccc'],
+        backgroundColor: ['#663399', '#e0e0e0'],
         borderWidth: 1,
       },
     ],
@@ -98,89 +111,100 @@ export default function Settings() {
     <div className="dashboard-container">
       <div className="dashboard-content-wrapper">
         <div className="main-content">
-          <h1 className="page-title">Settings</h1>
-          <hr />
-
-          {/* === Profile === */}
-          <h2>Profile</h2>
-          <div className="card settings-card">
-            <div className="profile-info">
-              <img src="/default-profile.png" alt="User" className="profile-img" />
-              <div className="profile-fields">
-                <label>Name</label>
-                <input name="name" value={profile.name} onChange={handleProfileChange} disabled={!editing} />
-
-                <label>Role</label>
-                <input value={profile.role} disabled />
-
-                <label>Email</label>
-                <input name="email" value={profile.email} onChange={handleProfileChange} disabled={!editing} />
-
-                <label>Phone</label>
-                <input name="phone" value={profile.phone} onChange={handleProfileChange} disabled={!editing} />
-
-                <label>Address</label>
-                <input name="address" value={profile.address} onChange={handleProfileChange} disabled={!editing} />
-
-                <label>Social Media</label>
-                <input name="social" value={profile.social} onChange={handleProfileChange} disabled={!editing} />
+          {/* Top bar (reusable layout header will appear) */}
+          <div className="top-section">
+            <div className="top-card">
+              <div className="search-add">
+                <input type="text" placeholder="Search..." />
+                <button className="add-btn">+ Add Bug</button>
               </div>
-              <button onClick={editing ? handleSaveProfile : () => setEditing(true)} className="edit-btn">
-                {editing ? 'Save' : 'Edit'}
-              </button>
             </div>
           </div>
 
-          {/* === Notifications + Allowance === */}
-          <h2>Notifications</h2>
-          <div className="card settings-card notification-card">
-            <div className="notify-column">
-              <h3>NOTIFY ME FOR THE BELOW ITEMS</h3>
+          <h1 className="page-title">Setting</h1>
+
+          {/* === Profile === */}
+        <h2>Profile</h2>
+        <div className="card profile-card">
+          <div className="left">
+            <img src="/default-profile.png" alt="User" className="profile-img" />
+            <div className="profile-name">
+              <label>Name</label>
+              <input name="name" value={profile.name} onChange={handleProfileChange} disabled={!editing} />
+
+              <label>Role</label>
+              <input value={profile.role} disabled />
+            </div>
+          </div>
+
+          <div className="right">
+              <div className="contact-info">
+              <label>Email</label>
+              <input name="email" value={profile.email} onChange={handleProfileChange} disabled={!editing} />
+
+              <label>Phone</label>
+              <input name="phone" value={profile.phone} onChange={handleProfileChange} disabled={!editing} />
+
+              <label>Address</label>
+              <input name="address" value={profile.address} onChange={handleProfileChange} disabled={!editing} />
+            </div>
+            <div className="social-links">
+              <label>Social Media</label>
+              <input name="social" value={profile.social} onChange={handleProfileChange} disabled={!editing} />
+            </div>
+            <button onClick={editing ? handleSaveProfile : () => setEditing(true)} className="edit-btn">
+              {editing ? 'Save' : 'Edit'}
+            </button>
+          </div>
+        </div>
+
+          {/* === Notification & Allowance === */}
+          <div className="card dual-card">
+            <div className="notify-col">
+              <h4>NOTIFY ME FOR THE BELOW ITEMS</h4>
               {[
                 ['events', 'Notify my events'],
-                ['forumMessages', 'When a message is posted in a forum/discussion'],
+                ['forumMessages', 'When a message is posted in a forum'],
                 ['newDocs', 'When a new document is uploaded'],
-                ['timeLogsRejected', 'When a user’s time logs are rejected'],
+                ['timeLogsRejected', "When a user's time logs are rejected"],
               ].map(([key, label]) => (
-                <div className="toggle-row" key={key}>
+                <div className="switch-row" key={key}>
                   <span>{label}</span>
-                  <button className={notifications[key] ? 'on' : 'off'} onClick={() => handleToggle('notifications', key)}>
-                    {notifications[key] ? 'On' : 'Off'}
-                  </button>
+                  <label className="switch">
+                    <input type="checkbox" checked={notifications[key]} onChange={() => handleToggle('notifications', key)} />
+                    <span className="slider" />
+                  </label>
                 </div>
               ))}
             </div>
 
             <div className="allowance-column">
-              <h3>ALLOWANCE</h3>
-              {[
-                ['seeProject', 'Allow others to see my project'],
-                ['updateProject', 'Allow others to update my project'],
-                ['copySchedule', 'Allow others to see and copy my schedule'],
-              ].map(([key, label]) => (
-                <div className="toggle-row" key={key}>
-                  <span>{label}</span>
-                  <button className={allowances[key] ? 'on' : 'off'} onClick={() => handleToggle('allowances', key)}>
-                    {allowances[key] ? 'On' : 'Off'}
-                  </button>
-                </div>
-              ))}
-            </div>
+            <h4>ALLOWANCE</h4>
+            {[
+              ['seeProject', 'Allow others to see my project'],
+              ['updateProject', 'Allow others to update my project'],
+              ['copySchedule', 'Allow others to see and copy my schedule'],
+            ].map(([key, label]) => (
+              <div className="switch-row" key={key}>
+                <span>{label}</span>
+                <label className="switch">
+                    <input type="checkbox" checked={notifications[key]} onChange={() => handleToggle('notifications', key)} />
+                    <span className="slider" />
+                  </label>
+              </div>
+            ))}
           </div>
-          <button className="save-btn" onClick={handleSaveSettings}>Save Settings</button>
+        </div>
+        <button className="save-btn" onClick={handleSaveSettings}>Save Settings</button>
 
-          {/* === Premium Plan === */}
-          <h2>Premium Plan</h2>
-          <div className="card settings-card premium-card">
-            <div className="premium-chart">
+         {/* === Premium Plan === */}
+          <div className="card premium-section">
+            <div className="chart-col">
               <Pie data={pieData} />
-              <p>
-                {usedStorage}GB / {totalStorage}GB used (
-                {Math.round((usedStorage / totalStorage) * 100)}%)
-              </p>
+              <p className="storage-text">{usedStorage} GB / {totalStorage} GB Used</p>
             </div>
-            <div className="premium-benefits">
-              <h3>Upgrade for additional benefits:</h3>
+            <div className="benefits-col">
+              <h4>Upgrade for additional benefits:</h4>
               <ul>
                 <li>✔ Business rules</li>
                 <li>✔ Webhooks</li>
@@ -188,9 +212,12 @@ export default function Settings() {
                 <li>✔ Web to bug form</li>
                 <li>✔ Custom fields</li>
                 <li>✔ Service level agreement</li>
-                <li>✔ Custom profiles and roles</li>
+                <li>✔ Custom profiles & roles</li>
               </ul>
-              <button className="upgrade-btn">Upgrade Now</button>
+              <div className="upgrade-row">
+                <span className="upgrade-text">Upgrade to Pro to get unlimited storage</span>
+                <button className="upgrade-btn">Upgrade Now</button>
+              </div>
             </div>
           </div>
         </div>
