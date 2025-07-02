@@ -1,0 +1,192 @@
+/* 📄 General Page Layout */
+.page-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #663399;
+}
+
+hr {
+  margin-bottom: 2rem;
+  border: none;
+  border-top: 2px solid #ccc;
+}
+
+/* 📦 Reusable Card Styling */
+.settings-card {
+  background: #fff;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+/* 👤 Profile Section */
+.profile-info {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.profile-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 100%;
+  object-fit: cover;
+  border: 2px solid #663399;
+}
+
+.profile-fields {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.profile-fields label {
+  font-weight: bold;
+  margin-top: 0.5rem;
+  grid-column: span 2;
+}
+
+.profile-fields input {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.edit-btn {
+  background-color: #663399;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 1rem;
+}
+
+.edit-btn:hover {
+  background-color: #4b2563;
+}
+
+/* 🔔 Notification and Allowance */
+.notification-card {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.notify-column,
+.allowance-column {
+  flex: 1;
+  min-width: 280px;
+}
+
+.notify-column h3,
+.allowance-column h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #663399;
+}
+
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.toggle-row span {
+  font-size: 0.95rem;
+  color: #333;
+  flex: 1;
+}
+
+.toggle-row button {
+  padding: 0.4rem 1.2rem;
+  border-radius: 20px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-row button.on {
+  background-color: #663399;
+  color: #fff;
+}
+
+.toggle-row button.off {
+  background-color: #ddd;
+  color: #333;
+}
+
+/* 💾 Save Settings */
+.save-btn {
+  padding: 0.6rem 1.4rem;
+  background-color: #28a745;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.save-btn:hover {
+  background-color: #218838;
+}
+
+/* 🌟 Premium Section */
+.premium-card {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.premium-chart {
+  width: 280px;
+  text-align: center;
+}
+
+.premium-chart p {
+  margin-top: 0.8rem;
+  font-weight: bold;
+}
+
+.premium-benefits {
+  flex: 1;
+}
+
+.premium-benefits h3 {
+  color: #663399;
+  margin-bottom: 1rem;
+}
+
+.premium-benefits ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.premium-benefits ul li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.upgrade-btn {
+  margin-top: 1rem;
+  padding: 0.6rem 1.4rem;
+  background-color: #ff9800;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.upgrade-btn:hover {
+  background-color: #e68900;
+}
