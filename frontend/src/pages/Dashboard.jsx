@@ -4,27 +4,65 @@ import { useAuth } from '../context/AuthContext';
 import '../styles/Dashboard.css';
 import ProgressPieChart from '../components/ProgressPieChart';
 
+// ✅ import your backend services
+import {
+  getBugs,
+} from '../services/bugService';
+import {
+  getProjects,
+} from '../services/projectService';
+
 export default function Dashboard() {
   const { currentUser } = useAuth();
+
+  // 🌍 Location
   const [location, setLocation] = useState('Fetching...');
 
   // 🐞 Bug State & Filter
   const [bugFilter, setBugFilter] = useState('All');
-  const [bugs, setBugs] = useState([]); // Empty initially
+  const [bugs, setBugs] = useState([]); // initially empty from DB
 
-  const filteredBugs = bugFilter === 'All'
-    ? bugs
-    : bugs.filter((bug) => bug.status === bugFilter);
+  const filteredBugs =
+    bugFilter === 'All'
+      ? bugs
+      : bugs.filter((bug) => bug.status === bugFilter);
 
   // 📁 Project State & Filter
   const [projectPriority, setProjectPriority] = useState('All');
-  const [projects, setProjects] = useState([]); // Empty initially
+  const [projects, setProjects] = useState([]); // initially empty from DB
 
-  const filteredProjects = projectPriority === 'All'
-    ? projects
-    : projects.filter((project) => project.priority === projectPriority);
+  const filteredProjects =
+    projectPriority === 'All'
+      ? projects
+      : projects.filter((project) => project.priority === projectPriority);
 
-  // 🌍 Location Fetching
+  // ✅ Load data on mount
+  useEffect(() => {
+    // Load Bugs
+    const fetchBugs = async () => {
+      try {
+        const res = await getBugs();
+        setBugs(res.data);
+      } catch (err) {
+        console.error('Error fetching bugs:', err);
+      }
+    };
+
+    // Load Projects
+    const fetchProjects = async () => {
+      try {
+        const res = await getProjects();
+        setProjects(res.data);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+      }
+    };
+
+    fetchBugs();
+    fetchProjects();
+  }, []);
+
+  // 🌍 Location fetching logic
   useEffect(() => {
     if (!navigator.geolocation) {
       setLocation('Location not supported');
@@ -38,7 +76,11 @@ export default function Dashboard() {
             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
           );
           const data = await res.json();
-          const city = data.address.city || data.address.town || data.address.state || 'Unknown';
+          const city =
+            data.address.city ||
+            data.address.town ||
+            data.address.state ||
+            'Unknown';
           setLocation(city);
         } catch (err) {
           setLocation('Unable to fetch location');
@@ -48,20 +90,27 @@ export default function Dashboard() {
     );
   }, []);
 
-  const displayName = currentUser?.displayName || currentUser?.email?.split('@')[0];
-  const avatarUrl = currentUser?.photoURL || `https://ui-avatars.com/api/?name=${displayName}`;
+  const displayName =
+    currentUser?.displayName || currentUser?.email?.split('@')[0];
+  const avatarUrl =
+    currentUser?.photoURL ||
+    `https://ui-avatars.com/api/?name=${displayName}`;
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-content-wrapper">
         <div className="main-content">
-
           {/* 🟪 Top Section - Welcome + Search */}
           <div className="top-section">
             <div className="top-card">
               <div className="search-add">
-                <input type="text" placeholder="Search bugs, projects..." />
-                <Link to="/bugs/new" className="add-btn">+ Add Bug</Link>
+                <input
+                  type="text"
+                  placeholder="Search bugs, projects..."
+                />
+                <Link to="/bugs/new" className="add-btn">
+                  + Add Bug
+                </Link>
               </div>
             </div>
 
@@ -78,20 +127,46 @@ export default function Dashboard() {
 
           {/* 🟡 Widget Cards */}
           <div className="widget-grid">
-            <div className="widget-card"><h3>Assigned Bugs</h3><p>{filteredBugs.filter(bug => bug.status === 'Active').length}</p></div>
-            <div className="widget-card"><h3>Fixed Bugs</h3><p>{filteredBugs.filter(bug => bug.status === 'Resolved').length}</p></div>
-            <div className="widget-card"><h3>Open Bugs</h3><p>{filteredBugs.filter(bug => bug.status === 'Open').length}</p></div>
-            <div className="widget-card"><h3>Total Bugs</h3><p>{filteredBugs.length}</p></div>
+            <div className="widget-card">
+              <h3>Assigned Bugs</h3>
+              <p>{filteredBugs.filter((bug) => bug.status === 'Active').length}</p>
+            </div>
+            <div className="widget-card">
+              <h3>Fixed Bugs</h3>
+              <p>{filteredBugs.filter((bug) => bug.status === 'Resolved').length}</p>
+            </div>
+            <div className="widget-card">
+              <h3>Open Bugs</h3>
+              <p>{filteredBugs.filter((bug) => bug.status === 'Open').length}</p>
+            </div>
+            <div className="widget-card">
+              <h3>Total Bugs</h3>
+              <p>{filteredBugs.length}</p>
+            </div>
           </div>
 
           {/* 📊 Bug Metrics Overview */}
           <div className="overview">
             <div className="bug-metrics">
-              <div><span>Bugs:</span> <b>{filteredBugs.length}</b></div>
-              <div><span>Completed:</span> <b>{filteredBugs.filter(bug => bug.status === 'Resolved').length}</b></div>
-              <div><span>On Hold:</span> <b>{filteredBugs.filter(bug => bug.status === 'On Hold').length}</b></div>
-              <div><span>Delayed:</span> <b>{filteredBugs.filter(bug => bug.status === 'Delayed').length}</b></div>
-              <div><span>Canceled:</span> <b>{filteredBugs.filter(bug => bug.status === 'Canceled').length}</b></div>
+              <div>
+                <span>Bugs:</span> <b>{filteredBugs.length}</b>
+              </div>
+              <div>
+                <span>Completed:</span>{' '}
+                <b>{filteredBugs.filter((bug) => bug.status === 'Resolved').length}</b>
+              </div>
+              <div>
+                <span>On Hold:</span>{' '}
+                <b>{filteredBugs.filter((bug) => bug.status === 'On Hold').length}</b>
+              </div>
+              <div>
+                <span>Delayed:</span>{' '}
+                <b>{filteredBugs.filter((bug) => bug.status === 'Delayed').length}</b>
+              </div>
+              <div>
+                <span>Canceled:</span>{' '}
+                <b>{filteredBugs.filter((bug) => bug.status === 'Canceled').length}</b>
+              </div>
             </div>
           </div>
 
@@ -103,15 +178,19 @@ export default function Dashboard() {
             </div>
 
             <div className="bug-filters">
-              {['All', 'Active', 'In Progress', 'On Hold', 'Canceled', 'Delayed'].map((status) => (
-                <button
-                  key={status}
-                  className={bugFilter === status ? 'active-filter' : ''}
-                  onClick={() => setBugFilter(status)}
-                >
-                  {status}
-                </button>
-              ))}
+              {['All', 'Active', 'In Progress', 'On Hold', 'Canceled', 'Delayed'].map(
+                (status) => (
+                  <button
+                    key={status}
+                    className={
+                      bugFilter === status ? 'active-filter' : ''
+                    }
+                    onClick={() => setBugFilter(status)}
+                  >
+                    {status}
+                  </button>
+                )
+              )}
             </div>
 
             <table className="table bugs-table">
@@ -127,13 +206,23 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {filteredBugs.map((bug) => (
-                  <tr key={bug.id}>
+                  <tr key={bug._id}>
                     <td>{bug.name}</td>
-                    <td>{bug.completed}</td>
-                    <td>{bug.owner}</td>
-                    <td>{bug.dueDate}</td>
-                    <td>{bug.priority}</td>
-                    <td><span className={`status ${bug.status.toLowerCase().replace(/\s/g, '')}`}>{bug.status}</span></td>
+                    <td>{bug.completed || '-'}</td>
+                    <td>{bug.owner?.name || '-'}</td>
+                    <td>
+                      {bug.dueDate
+                        ? new Date(bug.dueDate).toLocaleDateString('en-GB')
+                        : '-'}
+                    </td>
+                    <td>{bug.priority || '-'}</td>
+                    <td>
+                      <span
+                        className={`status ${bug.status?.toLowerCase().replace(/\s/g, '')}`}
+                      >
+                        {bug.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -151,7 +240,9 @@ export default function Dashboard() {
               {['All', 'High', 'Medium', 'Low'].map((level) => (
                 <button
                   key={level}
-                  className={projectPriority === level ? 'active-filter' : ''}
+                  className={
+                    projectPriority === level ? 'active-filter' : ''
+                  }
                   onClick={() => setProjectPriority(level)}
                 >
                   {level}
@@ -163,20 +254,24 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th>Project Name</th>
-                  <th>Completed</th>
-                  <th>Priority</th>
-                  <th>Last Updated</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Owner</th>
                   <th>Due Date</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProjects.map((project) => (
-                  <tr key={project.id}>
+                  <tr key={project._id}>
                     <td>{project.name}</td>
-                    <td>{project.completed}</td>
-                    <td>{project.priority}</td>
-                    <td>{project.updated}</td>
-                    <td>{project.dueDate}</td>
+                    <td>{project.description || '-'}</td>
+                    <td>{project.status || '-'}</td>
+                    <td>{project.createdBy?.name || '-'}</td>
+                    <td>
+                      {project.endDate
+                        ? new Date(project.endDate).toLocaleDateString('en-GB')
+                        : '-'}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -190,9 +285,17 @@ export default function Dashboard() {
             <h3>Calendar</h3>
             <p>June, 2025</p>
             <div className="calendar-grid">
-              <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
+              <div>Mo</div>
+              <div>Tu</div>
+              <div>We</div>
+              <div>Th</div>
+              <div>Fr</div>
+              <div>Sa</div>
+              <div>Su</div>
               {[...Array(30)].map((_, i) => (
-                <div key={i} className={i === 23 ? 'highlight' : ''}>{i + 1}</div>
+                <div key={i} className={i === 23 ? 'highlight' : ''}>
+                  {i + 1}
+                </div>
               ))}
             </div>
           </div>
@@ -200,10 +303,18 @@ export default function Dashboard() {
           <div className="progress-section">
             <h3>Overall Progress</h3>
             <ProgressPieChart
-              completed={filteredBugs.filter(bug => bug.status === 'Resolved').length}
-              onHold={filteredBugs.filter(bug => bug.status === 'On Hold').length}
-              delayed={filteredBugs.filter(bug => bug.status === 'Delayed').length}
-              canceled={filteredBugs.filter(bug => bug.status === 'Canceled').length}
+              completed={filteredBugs.filter(
+                (bug) => bug.status === 'Resolved'
+              ).length}
+              onHold={filteredBugs.filter(
+                (bug) => bug.status === 'On Hold'
+              ).length}
+              delayed={filteredBugs.filter(
+                (bug) => bug.status === 'Delayed'
+              ).length}
+              canceled={filteredBugs.filter(
+                (bug) => bug.status === 'Canceled'
+              ).length}
               total={filteredBugs.length}
             />
           </div>
@@ -214,7 +325,9 @@ export default function Dashboard() {
               <NavLink to="/team">Manage</NavLink>
             </div>
             <ul>
-              <li><b>Zaliah Abdullah</b> - Team Leader</li>
+              <li>
+                <b>Zaliah Abdullah</b> - Team Leader
+              </li>
               <li>Fasihah Asri - Member</li>
               <li>Ayuni Aziz - Member</li>
             </ul>
