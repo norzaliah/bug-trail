@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,13 +10,7 @@ export default function Dashboard() {
 
   // 🐞 Bug State & Filter
   const [bugFilter, setBugFilter] = useState('All');
-  const [bugs] = useState([
-    { id: 1, name: 'Crash', completed: '36%', owner: 'Qila', dueDate: '31-May-2025', priority: 'High', status: 'Active' },
-    { id: 2, name: 'Login Bug', completed: '70%', owner: 'Fasihah', dueDate: '01-Jun-2025', priority: 'Medium', status: 'In Progress' },
-    { id: 3, name: 'Layout Glitch', completed: '0%', owner: 'Zaliah', dueDate: '02-Jun-2025', priority: 'Low', status: 'On Hold' },
-    { id: 4, name: '404 Error', completed: '10%', owner: 'Ayuni', dueDate: '03-Jun-2025', priority: 'Medium', status: 'Canceled' },
-    { id: 5, name: 'Color Contrast', completed: '20%', owner: 'Qila', dueDate: '04-Jun-2025', priority: 'High', status: 'Delayed' }
-  ]);
+  const [bugs, setBugs] = useState([]); // Empty initially
 
   const filteredBugs = bugFilter === 'All'
     ? bugs
@@ -25,12 +18,7 @@ export default function Dashboard() {
 
   // 📁 Project State & Filter
   const [projectPriority, setProjectPriority] = useState('All');
-  const [projects] = useState([
-    { id: 1, name: 'Inventory Tracker', completed: '40%', priority: 'High', updated: 'Today 10:30 AM', dueDate: '05-Jun-2025' },
-    { id: 2, name: 'UI Redesign', completed: '65%', priority: 'Medium', updated: 'Yesterday 4:00 PM', dueDate: '10-Jun-2025' },
-    { id: 3, name: 'Analytics Dashboard', completed: '90%', priority: 'Low', updated: '2 days ago', dueDate: '15-Jun-2025' },
-    { id: 4, name: 'Bug Reporting System', completed: '75%', priority: 'High', updated: 'Today 9:00 AM', dueDate: '07-Jun-2025' }
-  ]);
+  const [projects, setProjects] = useState([]); // Empty initially
 
   const filteredProjects = projectPriority === 'All'
     ? projects
@@ -90,20 +78,20 @@ export default function Dashboard() {
 
           {/* 🟡 Widget Cards */}
           <div className="widget-grid">
-            <div className="widget-card"><h3>Assigned Bugs</h3><p>21</p></div>
-            <div className="widget-card"><h3>Fixed Bugs</h3><p>41</p></div>
-            <div className="widget-card"><h3>Open Bugs</h3><p>5</p></div>
-            <div className="widget-card"><h3>Total Bugs</h3><p>58</p></div>
+            <div className="widget-card"><h3>Assigned Bugs</h3><p>{filteredBugs.filter(bug => bug.status === 'Active').length}</p></div>
+            <div className="widget-card"><h3>Fixed Bugs</h3><p>{filteredBugs.filter(bug => bug.status === 'Resolved').length}</p></div>
+            <div className="widget-card"><h3>Open Bugs</h3><p>{filteredBugs.filter(bug => bug.status === 'Open').length}</p></div>
+            <div className="widget-card"><h3>Total Bugs</h3><p>{filteredBugs.length}</p></div>
           </div>
 
           {/* 📊 Bug Metrics Overview */}
           <div className="overview">
             <div className="bug-metrics">
-              <div><span>Bugs:</span> <b>58</b></div>
-              <div><span>Completed:</span> <b>41</b></div>
-              <div><span>On Hold:</span> <b>10</b></div>
-              <div><span>Delayed:</span> <b>3</b></div>
-              <div><span>Canceled:</span> <b>5</b></div>
+              <div><span>Bugs:</span> <b>{filteredBugs.length}</b></div>
+              <div><span>Completed:</span> <b>{filteredBugs.filter(bug => bug.status === 'Resolved').length}</b></div>
+              <div><span>On Hold:</span> <b>{filteredBugs.filter(bug => bug.status === 'On Hold').length}</b></div>
+              <div><span>Delayed:</span> <b>{filteredBugs.filter(bug => bug.status === 'Delayed').length}</b></div>
+              <div><span>Canceled:</span> <b>{filteredBugs.filter(bug => bug.status === 'Canceled').length}</b></div>
             </div>
           </div>
 
@@ -212,11 +200,11 @@ export default function Dashboard() {
           <div className="progress-section">
             <h3>Overall Progress</h3>
             <ProgressPieChart
-              completed={41}
-              onHold={10}
-              delayed={3}
-              canceled={5}
-              total={58}
+              completed={filteredBugs.filter(bug => bug.status === 'Resolved').length}
+              onHold={filteredBugs.filter(bug => bug.status === 'On Hold').length}
+              delayed={filteredBugs.filter(bug => bug.status === 'Delayed').length}
+              canceled={filteredBugs.filter(bug => bug.status === 'Canceled').length}
+              total={filteredBugs.length}
             />
           </div>
 

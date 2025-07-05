@@ -22,10 +22,14 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please add a password'],
+    required: function() {
+      // Only require password if not a Firebase user
+      return !this.firebaseUid;
+    },
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
   },
+  firebaseUid: { type: String }, // Store Firebase UID if available
   role: {
     type: String,
     enum: ['developer', 'tester', 'project-manager'], // Only these 3 roles

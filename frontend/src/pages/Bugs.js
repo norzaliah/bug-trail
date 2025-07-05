@@ -18,7 +18,14 @@ export default function Bugs() {
       setError('');
       try {
         const response = await bugService.getAllBugs();
-        setBugs(response.data || []);
+        console.log('BUGS API RESPONSE:', response.data);
+        setBugs(
+          Array.isArray(response.data)
+            ? response.data
+            : Array.isArray(response.data?.data)
+              ? response.data.data
+              : []
+        );
       } catch (err) {
         console.error('Error fetching bugs:', err.message);
         setError('Failed to load bugs. Please try again later.');

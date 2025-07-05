@@ -33,11 +33,18 @@ exports.protect = async (req, res, next) => {
     let user = await User.findOne({ firebaseId: firebaseUser.uid });
     
     if (!user) {
-      user = await User.create({
-        firebaseId: firebaseUser.uid,
-        email: firebaseUser.email,
-        name: firebaseUser.displayName || firebaseUser.email.split('@')[0]
-      });
+      const existingUser = await User.findOne({ email: firebaseUser.email });
+      if (!existingUser) {
+        // create new user
+        user = await User.create({
+          firebaseId: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0]
+        });
+      } else {
+        // use existingUser
+        user = existingUser;
+      }
     }
     
     req.user = user;
