@@ -14,8 +14,11 @@ export default function Dashboard() {
   const [location, setLocation] = useState('Fetching...');
   const [bugFilter, setBugFilter] = useState('All');
   const [bugs, setBugs] = useState([]);
-  const [projectPriority, setProjectPriority] = useState('All');
+  const [projectStatus, setProjectStatus] = useState('All');
   const [projects, setProjects] = useState([]);
+
+  // ✅ NEW: Calendar state
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const filteredBugs =
     bugFilter === 'All'
@@ -23,12 +26,12 @@ export default function Dashboard() {
       : bugs.filter((bug) => bug.status === bugFilter);
 
   const filteredProjects = Array.isArray(projects)
-    ? projectPriority === 'All'
+    ? projectStatus === 'All'
       ? projects
       : projects.filter(
           (project) =>
-            (project.priority || '').toLowerCase() ===
-            projectPriority.toLowerCase()
+            (project.status || '').toLowerCase() ===
+            projectStatus.toLowerCase()
         )
     : [];
 
@@ -93,19 +96,47 @@ export default function Dashboard() {
     currentUser?.photoURL ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}`;
 
+    // ✅ BUG METRICS logic (Progress Overview):
   const openBugs = filteredBugs.filter((b) => b.status === 'Open').length;
-  const inProgressBugs = filteredBugs.filter(
-    (b) => b.status === 'Active' || b.status === 'In Progress'
-  ).length;
-  const resolvedBugs = filteredBugs.filter(
-    (b) => b.status === 'Resolved' || b.status === 'Closed'
-  ).length;
+  const activeBugs = filteredBugs.filter((b) => b.status === 'Active').length;
+  const inProgressBugs = filteredBugs.filter((b) => b.status === 'In Progress').length;
+  const resolvedBugs = filteredBugs.filter((b) => b.status === 'Resolved').length;
+  const closedBugs = filteredBugs.filter((b) => b.status === 'Closed').length;
   const totalBugs = filteredBugs.length;
+
+  // ✅ CALENDAR logic:
+  const monthName = currentDate.toLocaleString('default', { month: 'long' });
+  const year = currentDate.getFullYear();
+  const firstDay = new Date(year, currentDate.getMonth(), 1).getDay();
+  const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
+
+  const goToPrevMonth = () => {
+    setCurrentDate(new Date(year, currentDate.getMonth() - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    setCurrentDate(new Date(year, currentDate.getMonth() + 1, 1));
+  };
+
+  const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+  const blanks = Array.from({ length: firstDay }, (_, i) => (
+    <div key={`blank-${i}`} className="blank"></div>
+  ));
+
+  const days = Array.from({ length: daysInMonth }, (_, i) => (
+    <div key={i} className={i + 1 === currentDate.getDate() ? 'highlight' : ''}>
+      {i + 1}
+    </div>
+  ));
+
+  const calendarCells = [...blanks, ...days];
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-content-wrapper">
         <div className="main-content">
+          {/* TOP AREA */}
           <div className="top-section">
             <div className="top-card">
               <div className="search-add">
@@ -163,6 +194,7 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* BUG TABLE */}
           <section className="card bug-section">
             <div className="section-header">
               <h2>Bugs</h2>
@@ -219,6 +251,7 @@ export default function Dashboard() {
             </table>
           </section>
 
+          {/* PROJECT TABLE */}
           <section className="card project-section">
             <div className="section-header">
               <h2>My Projects</h2>
@@ -226,13 +259,13 @@ export default function Dashboard() {
             </div>
 
             <div className="project-filters">
-              {['All', 'High', 'Medium', 'Low'].map((level) => (
+              {['All', 'Active', 'On Hold', 'Completed', 'Archived'].map((level) => (
                 <button
                   key={level}
                   className={
-                    projectPriority === level ? 'active-filter' : ''
+                    projectStatus === level ? 'active-filter' : ''
                   }
-                  onClick={() => setProjectPriority(level)}
+                  onClick={() => setProjectStatus(level)}
                 >
                   {level}
                 </button>
@@ -254,7 +287,15 @@ export default function Dashboard() {
                   <tr key={project._id}>
                     <td>{project.name}</td>
                     <td>{project.description || '-'}</td>
-                    <td>{project.status || '-'}</td>
+                    <td>
+                      <span
+                        className={`status ${project.status
+                          ?.toLowerCase()
+                          .replace(/\s/g, '')}`}
+                      >
+                        {project.status}
+                      </span>
+                    </td>
                     <td>{project.createdBy?.name || '-'}</td>
                     <td>
                       {project.endDate
@@ -268,23 +309,20 @@ export default function Dashboard() {
           </section>
         </div>
 
+        {/* ✅ NEW DYNAMIC CALENDAR */}
         <aside className="right-panel">
           <div className="calendar">
             <h3>Calendar</h3>
-            <p>June, 2025</p>
+            <div className="calendar-header">
+              <button onClick={goToPrevMonth}>«</button>
+              <p>{monthName}, {year}</p>
+              <button onClick={goToNextMonth}>»</button>
+            </div>
             <div className="calendar-grid">
-              <div>Mo</div>
-              <div>Tu</div>
-              <div>We</div>
-              <div>Th</div>
-              <div>Fr</div>
-              <div>Sa</div>
-              <div>Su</div>
-              {[...Array(30)].map((_, i) => (
-                <div key={i} className={i === 23 ? 'highlight' : ''}>
-                  {i + 1}
-                </div>
+              {dayNames.map((d) => (
+                <div key={d} className="day-name">{d}</div>
               ))}
+              {calendarCells}
             </div>
           </div>
 
@@ -292,8 +330,10 @@ export default function Dashboard() {
             <h3>Overall Progress</h3>
             <ProgressPieChart
               open={openBugs}
+              active={activeBugs}
               inProgress={inProgressBugs}
               resolved={resolvedBugs}
+              closed={closedBugs}
               total={totalBugs}
             />
           </div>
@@ -304,9 +344,7 @@ export default function Dashboard() {
               <NavLink to="/team">Manage</NavLink>
             </div>
             <ul>
-              <li>
-                <b>Zaliah Abdullah</b> - Team Leader
-              </li>
+              <li><b>Zaliah Abdullah</b> - Team Leader</li>
               <li>Fasihah Asri - Member</li>
               <li>Ayuni Aziz - Member</li>
             </ul>

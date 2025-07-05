@@ -4,19 +4,21 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const ProgressPieChart = ({ open, inProgress, resolved, total }) => {
+const ProgressPieChart = ({ open, active, inProgress, resolved, closed, total }) => {
   const percent = (count) => (total === 0 ? 0 : Math.round((count / total) * 100));
 
   const data = {
-    labels: ['Open', 'In Progress', 'Resolved'],
+    labels: ['Open', 'Active', 'In Progress', 'Resolved', 'Closed'],
     datasets: [
       {
         data: [
           percent(open),
+          percent(active),
           percent(inProgress),
           percent(resolved),
+          percent(closed),
         ],
-        backgroundColor: ['#fdcb6e', '#0984e3', '#00b894'],
+        backgroundColor: ['#fdcb6e', '#00b894','#0984e3', '#e17055', '#d63031'],
         borderColor: '#fff',
         borderWidth: 2,
       },
