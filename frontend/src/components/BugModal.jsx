@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import '../styles/BugModal.css';
 
 export default function BugModal({ isOpen, onClose, onSave, initialData }) {
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
+    description: '',
     completed: '',
     owner: '',
     dueDate: '',
@@ -17,7 +17,8 @@ export default function BugModal({ isOpen, onClose, onSave, initialData }) {
       setFormData(initialData);
     } else {
       setFormData({
-        name: '',
+        title: '',
+        description: '',
         completed: '',
         owner: '',
         dueDate: '',
@@ -46,13 +47,21 @@ export default function BugModal({ isOpen, onClose, onSave, initialData }) {
         <h2>{initialData ? 'Edit Bug' : 'Create Bug'}</h2>
         <form onSubmit={handleSubmit} className="bug-form">
           <label>
-            Bug Name:
+            Title:
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="title"
+              value={formData.title}
               onChange={handleChange}
               required
+            />
+          </label>
+          <label>
+            Description:
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
             />
           </label>
           <label>
@@ -97,11 +106,10 @@ export default function BugModal({ isOpen, onClose, onSave, initialData }) {
             Status:
             <select name="status" value={formData.status} onChange={handleChange}>
               <option value="">Select</option>
-              <option value="Active">Active</option>
+              <option value="Open">Open</option>
               <option value="In Progress">In Progress</option>
-              <option value="On Hold">On Hold</option>
-              <option value="Canceled">Canceled</option>
-              <option value="Delayed">Delayed</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
             </select>
           </label>
           <div className="modal-actions">

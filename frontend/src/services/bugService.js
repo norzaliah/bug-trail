@@ -1,8 +1,26 @@
 import api from './api';
 
+/**
+ * Fetch all bugs.
+ * Returns a consistent array regardless of backend response shape.
+ */
 export const getBugs = async () => {
   const response = await api.get('/bugs');
-  return response.data;
+
+  if (Array.isArray(response.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response.data?.data)) {
+    return response.data.data;
+  }
+
+  if (Array.isArray(response.data?.bugs)) {
+    return response.data.bugs;
+  }
+
+  console.warn('⚠️ getBugs(): API response was not an array.', response.data);
+  return [];
 };
 
 export const getBug = async (id) => {

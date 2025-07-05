@@ -1,224 +1,247 @@
-import React, { useState, useEffect } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import '../styles/Calendar.css';
-import EventModal from '../components/EventModal';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import React, { useState, useEffect } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import "../styles/Calendar.css";
+import BugModal from "../components/BugModal";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import { getBugs, createBug } from "../services/bugService";
 
 export default function CalendarPage() {
+  const [bugs, setBugs] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedBugs, setSelectedBugs] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingEvent, setEditingEvent] = useState(null);
-  const [form, setForm] = useState({ title: '', date: '', time: '', description: '' });
-  const [selectedEvents, setSelectedEvents] = useState([]);
-
-  const [events, setEvents] = useState([
-    { id: 1, title: 'Project Deadline', date: '2025-07-01', time: '10:00', description: 'Final submission for client' },
-    { id: 2, title: 'Team Meeting', date: '2025-07-02', time: '15:00', description: 'Weekly catch-up' },
-    { id: 3, title: 'Code Review', date: '2025-07-03', time: '17:00', description: 'Bug fixes check' },
-  ]);
-
-  const filteredEvents = events.filter(event =>
-    new Date(event.date).toDateString() === selectedDate.toDateString()
-  );
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const now = new Date();
-    const upcoming = events.filter(event => {
-      const eventDate = new Date(`${event.date}T${event.time}`);
-      return eventDate > now && eventDate - now <= 5 * 60 * 1000;
-    });
+    fetchBugs();
+  }, []);
 
-    upcoming.forEach(event => {
-      const eventDate = new Date(`${event.date}T${event.time}`);
-      const timeDiff = eventDate - now;
-
-      setTimeout(() => {
-        alert(`🔔 Reminder: ${event.title} at ${event.time}`);
-      }, timeDiff);
-    });
-  }, [events]);
-
-  const handleAddEvent = (newEvent) => {
-    const id = events.length ? Math.max(...events.map(ev => ev.id)) + 1 : 1;
-    setEvents([...events, { ...newEvent, id }]);
-    setShowModal(false);
-  };
-
-  const handleEdit = (event) => {
-    setEditingEvent(event);
-    setForm({
-      title: event.title,
-      date: event.date,
-      time: event.time,
-      description: event.description,
-    });
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      setEvents(events.filter(e => e.id !== id));
-      setSelectedEvents(selectedEvents.filter(eid => eid !== id));
+  const fetchBugs = async () => {
+    try {
+      const data = await getBugs();
+      console.log("✅ Bugs fetched for Calendar:", data);
+      setBugs(data);
+    } catch (err) {
+      console.error("Error fetching bugs", err);
+      setBugs([]);
     }
   };
 
-  const handleFormChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    setEvents(events.map(ev => ev.id === editingEvent.id ? { ...editingEvent, ...form } : ev));
-    setEditingEvent(null);
+  const handleAddBug = async (bugData) => {
+    try {
+      const saved = await createBug(bugData);
+      setBugs((prev) => [...prev, saved]);
+      setShowModal(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save bug.");
+    }
   };
 
   const handleCheckboxChange = (id) => {
-    if (selectedEvents.includes(id)) {
-      setSelectedEvents(selectedEvents.filter(eid => eid !== id));
-    } else {
-      setSelectedEvents([...selectedEvents, id]);
-    }
-  };
-
-  const handleExportPDF = () => {
-    if (selectedEvents.length === 0) {
-      alert("Please select at least one event to export.");
-      return;
-    }
-
-    const input = document.getElementById('selected-events-section');
-    html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const width = pdf.internal.pageSize.getWidth();
-      const height = (canvas.height * width) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, width, height);
-      pdf.save(`events-${selectedDate.toDateString()}.pdf`);
-    });
+    setSelectedBugs((prev) =>
+      prev.includes(id) ? prev.filter((eid) => eid !== id) : [...prev, id]
+    );
   };
 
   const handleShare = () => {
-    const selected = events.filter(ev => selectedEvents.includes(ev.id));
+    const selected = bugs.filter((b) => selectedBugs.includes(b._id));
     if (selected.length === 0) {
-      alert("Please select events to share.");
+      alert("Please select bugs to share.");
       return;
     }
 
-    const text = selected.map(ev =>
-      `• ${ev.title} on ${ev.date} at ${ev.time}\n${ev.description}`
-    ).join('\n\n');
+    const text = selected
+      .map(
+        (b) =>
+          `• ${b.name || b.title} [${b.priority}] due ${
+            b.dueDate || "N/A"
+          }\nStatus: ${b.status}\nOwner: ${
+            b.owner || "N/A"
+          }\nCompleted: ${b.completed || 0}%`
+      )
+      .join("\n\n");
 
-    navigator.clipboard.writeText(text)
-      .then(() => alert("Events copied to clipboard!"))
+    navigator.clipboard
+      .writeText(text)
+      .then(() => alert("Bugs copied to clipboard!"))
       .catch(() => alert("Failed to copy."));
+  };
+
+  const handleExportPDF = () => {
+    if (selectedBugs.length === 0) {
+      alert("Select bugs to export.");
+      return;
+    }
+    const input = document.getElementById("selected-bugs-section");
+    if (!input) {
+      alert("Nothing to export.");
+      return;
+    }
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const width = pdf.internal.pageSize.getWidth();
+      const height = (canvas.height * width) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, width, height);
+      pdf.save(`bugs-${selectedDate.toDateString()}.pdf`);
+    });
+  };
+
+  // Filter bugs for the selected date
+  const filteredBugs = bugs.filter(
+    (b) =>
+      b?.dueDate &&
+      new Date(b.dueDate).toDateString() === selectedDate.toDateString()
+  );
+
+  // Apply search filter
+  const displayedBugs = bugs.filter((b) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      b?.name?.toLowerCase().includes(query) ||
+      b?.title?.toLowerCase().includes(query) ||
+      b?.status?.toLowerCase().includes(query)
+    );
+  });
+
+  const tileContent = ({ date }) => {
+    const hasBug = bugs.some(
+      (b) =>
+        b?.dueDate &&
+        new Date(b.dueDate).toDateString() === date.toDateString()
+    );
+    if (hasBug) {
+      return (
+        <span className="bug-dot" title="Bug(s) due">
+          •
+        </span>
+      );
+    }
+    return null;
   };
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-content-wrapper">
         <div className="main-content">
-
-          {/* Top Section */}
+          {/* Top Header */}
           <div className="top-section">
             <div className="top-card calendar-header-bar">
               <div className="calendar-actions">
-                <input type="text" placeholder="Search events..." className="calendar-search" />
-                <button className="create-event-btn" onClick={() => setShowModal(true)}>
-                  + Create Event
+                <input
+                  type="text"
+                  placeholder="Search bugs..."
+                  className="calendar-search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  className="create-event-btn"
+                  onClick={() => setShowModal(true)}
+                >
+                  + Add Bug
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Main Calendar Card */}
+          {/* Calendar Card */}
           <div className="card calendar-card">
             <div className="calendar-header">
               <h3>Calendar</h3>
               <hr />
             </div>
-            <div className="calendar-body">
 
-              {/* Event List Column */}
+            <div className="calendar-body">
+              {/* Left column */}
               <div className="event-column">
-                <h4>Upcoming Events</h4>
-                {events.map(event => (
-                  <div
-                    key={event.id}
-                    className="event-card"
-                    onClick={() => setSelectedDate(new Date(event.date))}
-                  >
-                    <input
-                      type="checkbox"
-                      className="event-checkbox"
-                      checked={selectedEvents.includes(event.id)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        handleCheckboxChange(event.id);
-                      }}
-                    />
-                    <h5>{event.title}</h5>
-                    <p>{event.date} at {event.time}</p>
-                    <small>{event.description}</small>
-                    <div className="event-actions">
-                      <button onClick={(e) => { e.stopPropagation(); handleEdit(event); }}>✏️</button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(event.id); }}>🗑️</button>
+                <h4>Upcoming Bugs</h4>
+                {displayedBugs.length > 0 ? (
+                  displayedBugs.map((bug) => (
+                    <div
+                      key={bug._id}
+                      className={`event-card severity-${bug.priority?.toLowerCase()}`}
+                      onClick={() =>
+                        setSelectedDate(
+                          bug.dueDate ? new Date(bug.dueDate) : new Date()
+                        )
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        className="event-checkbox"
+                        checked={selectedBugs.includes(bug._id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleCheckboxChange(bug._id);
+                        }}
+                      />
+                      <h5>{bug.name || bug.title}</h5>
+                      <p>
+                        Due: {bug.dueDate || "N/A"} | {bug.completed || 0}% done
+                      </p>
+                      <p>Status: {bug.status || "N/A"}</p>
+                      <small>Owner: {bug.owner || "N/A"}</small>
+                      <span className="severity-tag">
+                        {bug.priority || "N/A"}
+                      </span>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p>No bugs found.</p>
+                )}
               </div>
 
-              {/* Calendar Column */}
+              {/* Calendar column */}
               <div className="calendar-column">
                 <Calendar
                   onChange={setSelectedDate}
                   value={selectedDate}
                   className="custom-calendar"
+                  tileContent={tileContent}
                 />
                 <div className="calendar-buttons">
-                  <button className="share-btn" onClick={handleShare}>🔗 Share Events</button>
-                  <button className="share-btn" onClick={handleExportPDF}>📄 Download PDF</button>
+                  <button className="share-btn" onClick={handleShare}>
+                    🔗 Share Bugs
+                  </button>
+                  <button className="share-btn" onClick={handleExportPDF}>
+                    📄 Download PDF
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Selected Date Events */}
-            {filteredEvents.length > 0 && (
-              <div className="selected-event-details" id="selected-events-section">
-                <h4>Events on {selectedDate.toDateString()}</h4>
-                {filteredEvents.map(ev => (
-                  <div key={ev.id}>
-                    <p><strong>{ev.title}</strong> — {ev.time}</p>
-                    <p>{ev.description}</p>
+            {/* Selected Day Details */}
+            {filteredBugs.length > 0 && (
+              <div
+                className="selected-event-details"
+                id="selected-bugs-section"
+              >
+                <h4>Bugs due on {selectedDate.toDateString()}</h4>
+                {filteredBugs.map((bug) => (
+                  <div key={bug._id}>
+                    <p>
+                      <strong>{bug.name || bug.title}</strong> —{" "}
+                      {bug.priority} Priority
+                    </p>
+                    <p>Status: {bug.status}</p>
+                    <p>Owner: {bug.owner}</p>
+                    <p>Completed: {bug.completed}%</p>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Edit Modal */}
-          {editingEvent && (
-            <div className="event-modal">
-              <div className="modal-content">
-                <h3>Edit Event</h3>
-                <form onSubmit={handleFormSubmit}>
-                  <input name="title" value={form.title} onChange={handleFormChange} placeholder="Title" required />
-                  <input type="date" name="date" value={form.date} onChange={handleFormChange} required />
-                  <input type="time" name="time" value={form.time} onChange={handleFormChange} required />
-                  <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Description" />
-                  <div className="modal-actions">
-                    <button type="submit">✅ Save</button>
-                    <button type="button" onClick={() => setEditingEvent(null)}>❌ Cancel</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Add Event Modal */}
-          {showModal && (
-            <EventModal onClose={() => setShowModal(false)} onSave={handleAddEvent} />
-          )}
+          {/* Bug Modal */}
+          <BugModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            onSave={handleAddBug}
+          />
         </div>
       </div>
     </div>

@@ -7,7 +7,7 @@
   margin-top: 1rem;
 }
 
-/* 🔍 SEARCH & CREATE EVENT BUTTON SECTION */
+/* 🔍 SEARCH & ADD BUG BUTTON SECTION */
 .calendar-top-bar,
 .calendar-actions {
   display: flex;
@@ -37,7 +37,7 @@
 }
 
 .create-event-btn:hover {
-  background-color: #663399;
+  background-color: #51288e;
 }
 
 /* 📅 HEADER TITLE */
@@ -46,7 +46,7 @@
   color: #663399;
 }
 
-/* 🔄 LAYOUT OF EVENT + CALENDAR COLUMNS */
+/* 🔄 LAYOUT OF BUGS + CALENDAR COLUMNS */
 .calendar-body {
   display: flex;
   gap: 2rem;
@@ -65,7 +65,7 @@
   align-items: center;
 }
 
-/* 📌 EACH EVENT CARD */
+/* 🐞 EACH BUG CARD */
 .event-card {
   background: #ffffff;
   border-left: 6px solid #9c27b0;
@@ -80,7 +80,7 @@
   background: #f3e5f5;
 }
 
-/* ✏️/🗑️ ICON BUTTONS ON EVENT */
+/* 🧩 BUG ACTIONS (currently hidden since no edit/delete) */
 .event-actions {
   display: flex;
   justify-content: flex-end;
@@ -95,7 +95,7 @@
   font-size: 1rem;
 }
 
-/* ✅ CHECKBOX for exporting events */
+/* ✅ CHECKBOX for exporting bugs */
 .event-checkbox {
   margin-right: 8px;
 }
@@ -128,7 +128,7 @@
 }
 
 .react-calendar__navigation button:disabled {
-  color: #ffffff;
+  color: #cccccc;
   cursor: not-allowed;
 }
 
@@ -209,7 +209,7 @@
 }
 
 .share-btn:hover {
-  background: #7455D4;
+  background: #5f44b2;
 }
 
 /* 📝 DETAILS FOR SELECTED DAY */
@@ -220,38 +220,4 @@
   border-radius: 12px;
 }
 
-/* ✏️ MODAL */
-.event-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.modal-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 300px;
-}
-
-.modal-content form input,
-.modal-content form textarea {
-  width: 100%;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-/* 🆗 / ❌ MODAL BUTTONS */
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-}
+/* ✅ CLEANUP: Removed modal styles previously used for EventModal */

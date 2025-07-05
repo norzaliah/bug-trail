@@ -26,27 +26,33 @@ export default function Dashboard() {
     : bugs.filter((bug) => bug.status === bugFilter);
 
   // Apply selected project priority filter
-  const filteredProjects = projectPriority === 'All'
-    ? projects
-    : projects.filter((project) => project.priority === projectPriority);
+  const filteredProjects = Array.isArray(projects)
+    ? (
+      projectPriority === 'All'
+        ? projects
+        : projects.filter((project) => project.priority === projectPriority)
+    )
+    : [];
 
   // Fetch bugs and projects from backend on component mount
   useEffect(() => {
     const fetchBugs = async () => {
       try {
         const res = await getBugs();
-        setBugs(res.data);
+        setBugs(Array.isArray(res) ? res : []);
       } catch (err) {
         console.error('Error fetching bugs:', err);
+        setBugs([]);
       }
     };
 
     const fetchProjects = async () => {
       try {
         const res = await getProjects();
-        setProjects(res.data);
+        setProjects(Array.isArray(res) ? res : []);
       } catch (err) {
         console.error('Error fetching projects:', err);
+        setProjects([]);
       }
     };
 
