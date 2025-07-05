@@ -23,6 +23,7 @@
   color: #333;
 }
 
+/* Filter Buttons */
 .bug-filters {
   display: flex;
   gap: 0.5rem;
@@ -46,6 +47,7 @@
   color: white;
 }
 
+/* Add Button */
 .add-bug-btn {
   padding: 0.6rem 1.2rem;
   font-size: 0.95rem;
@@ -61,6 +63,7 @@
   background-color: #0056b3;
 }
 
+/* Grid Display */
 .bugs-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
@@ -94,6 +97,7 @@
   border-bottom: 1px solid #eee;
 }
 
+/* Bug Name + Desc */
 .bug-name strong {
   font-size: 1rem;
   color: #222;
@@ -105,6 +109,7 @@
   margin-top: 4px;
 }
 
+/* Priority Labels */
 .priority, .status {
   padding: 5px 10px;
   border-radius: 20px;
@@ -120,11 +125,14 @@
 .priority-medium   { background: #fffde7; color: #f9a825; }
 .priority-low      { background: #e8f5e9; color: #2e7d32; }
 
-.status-open         { background: #e3f2fd; color: #1565c0; }
-.status-in-progress  { background: #fff3e0; color: #ef6c00; }
-.status-resolved     { background: #e8f5e9; color: #2e7d32; }
-.status-closed       { background: #f0f0f0; color: #424242; }
+/* ✅ Updated Consistent Status Styles */
+.status.open        { background: #fdcb6e; color: #fff; }
+.status.inprogress  { background: #0984e3; color: #fff; }
+.status.resolved    { background: #e17055; color: #fff; }
+.status.closed      { background: #d63031; color: #fff; }
+.status.active      { background: #00b894; color: #fff; }
 
+/* Message States */
 .loading, .error, .no-bugs {
   text-align: center;
   margin-top: 2rem;
@@ -132,6 +140,7 @@
   font-size: 1rem;
 }
 
+/* Table Styling */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -145,4 +154,50 @@
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #eee;
   text-align: left;
+}
+
+/* ✅ View / Edit / Delete Buttons */
+.bug-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.bug-actions button {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.bug-actions .view-btn {
+  background-color: #0984e3;
+  color: white;
+}
+
+.bug-actions .edit-btn {
+  background-color: #fdcb6e;
+  color: #333;
+}
+
+.bug-actions .delete-btn {
+  background-color: #d63031;
+  color: white;
+}
+
+.bug-actions .view-btn:hover {
+  background-color: #0864b3;
+}
+
+.bug-actions .edit-btn:hover {
+  background-color: #fbbd4a;
+}
+
+.bug-actions .delete-btn:hover {
+  background-color: #c0392b;
+}
+.bug-actions button:hover {
+  opacity: 0.9;
 }

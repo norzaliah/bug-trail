@@ -1,21 +1,24 @@
+// frontend/pages/Bugs.jsx
+
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Bugs.css';
 import { bugService } from '../services/api';
 import BugModal from '../components/BugModal';
 
 export default function Bugs() {
-  // 🔄 States for managing bugs, search, filters, etc.
+  // 🔄 State for bugs and UI
   const [bugs, setBugs] = useState([]);
   const [bugFilter, setBugFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // 🧩 Modal control states
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingBugId, setEditingBugId] = useState(null); // null = create mode
+  // Modal controls
+  const [modalMode, setModalMode] = useState(null);
+  const [editingBugId, setEditingBugId] = useState(null);
 
-  // 🚀 Load all bugs on first render
+  // Load bugs on mount
   useEffect(() => {
     const fetchBugs = async () => {
       setLoading(true);
@@ -41,7 +44,7 @@ export default function Bugs() {
     fetchBugs();
   }, []);
 
-  // 🗑️ Delete a bug from the DB and remove it locally
+  // Delete a bug
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this bug?')) {
       try {
@@ -54,37 +57,37 @@ export default function Bugs() {
     }
   };
 
-  // 📝 Edit bug handler → opens modal with specific bug id
+  // Open modal for editing
   const handleEdit = (id) => {
     setEditingBugId(id);
-    setModalOpen(true);
+    setModalMode('edit');
   };
 
-  // ➕ Add bug handler → opens modal in create mode
-  const handleAdd = () => {
-    setEditingBugId(null);
-    setModalOpen(true);
+  // Open modal for view mode
+  const handleView = (id) => {
+    setEditingBugId(id);
+    setModalMode('view');
   };
 
-  // ✅ Save handler after modal submit → updates or inserts
+  // Handle save from modal (edit or create)
   const handleSave = (savedBug) => {
     setBugs((prev) => {
       const exists = prev.find((b) => b._id === savedBug._id);
       if (exists) {
-        // update
+        // Update existing bug
         return prev.map((b) =>
           b._id === savedBug._id ? savedBug : b
         );
       } else {
-        // insert new
+        // Add new bug
         return [savedBug, ...prev];
       }
     });
-    setModalOpen(false);
+    setModalMode(null);
     setEditingBugId(null);
   };
 
-  // 🔍 Filter + search logic
+  // Filter and search
   const filteredBugs = bugs
     .filter((bug) =>
       bug.title?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -99,7 +102,8 @@ export default function Bugs() {
     <div className="dashboard-container">
       <div className="dashboard-content-wrapper">
         <div className="main-content">
-          {/* Top Bar */}
+
+          {/* 🔎 Search & Add */}
           <div className="top-section">
             <div className="top-card">
               <div className="search-add">
@@ -109,17 +113,14 @@ export default function Bugs() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <button
-                  className="add-btn"
-                  onClick={handleAdd}
-                >
+                <Link to="/bugs/new" className="add-btn">
                   + Add Bug
-                </button>
+                </Link>
               </div>
             </div>
           </div>
 
-          {/* Filters */}
+          {/* 🗂 Filters */}
           <div className="bug-filters">
             {['All', 'Open', 'In Progress', 'Resolved', 'Closed'].map((status) => (
               <button
@@ -132,7 +133,7 @@ export default function Bugs() {
             ))}
           </div>
 
-          {/* Conditional Rendering */}
+          {/* 🖥️ Table or feedback */}
           {loading ? (
             <div className="loading">Loading bugs...</div>
           ) : error ? (
@@ -156,7 +157,11 @@ export default function Bugs() {
                     <tr key={bug._id}>
                       <td>{bug.title}</td>
                       <td>
-                        <span className={`status ${bug.status?.toLowerCase().replace(/\s/g, '')}`}>
+                        <span
+                          className={`status ${bug.status
+                            ?.toLowerCase()
+                            .replace(/\s/g, '')}`}
+                        >
                           {bug.status}
                         </span>
                       </td>
@@ -170,7 +175,7 @@ export default function Bugs() {
                         <div className="bug-actions">
                           <button
                             className="view-btn"
-                            onClick={() => alert('View feature not implemented yet.')}
+                            onClick={() => handleView(bug._id)}
                           >
                             View
                           </button>
@@ -197,14 +202,15 @@ export default function Bugs() {
         </div>
       </div>
 
-      {/* 🧩 Bug Modal */}
+      {/* Bug Modal for View/Edit */}
       <BugModal
-        isOpen={modalOpen}
+        isOpen={!!modalMode}
+        mode={modalMode}
+        initialBugId={editingBugId}
         onClose={() => {
-          setModalOpen(false);
+          setModalMode(null);
           setEditingBugId(null);
         }}
-        initialBugId={editingBugId}
         onSave={handleSave}
       />
     </div>
