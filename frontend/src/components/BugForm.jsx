@@ -1,4 +1,4 @@
-// frontend/pages/BugForm.jsx
+// frontend/components/BugForm.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -10,9 +10,11 @@ export default function BugForm() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Determine if editing or creating a new bug
   const isEdit = Boolean(id);
   const isEditable = user && ['developer', 'tester'].includes(user.role);
 
+  // Form state for the bug fields
   const [bug, setBug] = useState({
     title: '',
     description: '',
@@ -22,23 +24,44 @@ export default function BugForm() {
     owner: user?._id || '',
   });
 
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState('');
+  const [users, setUsers] = useState([]); // Team users for assignment dropdown
+  const [error, setError] = useState(''); // Display errors in UI
 
   useEffect(() => {
+    /**
+     * Fetch the list of users to assign bugs to.
+     */
     const fetchUsers = async () => {
       try {
         const res = await api.get('/users');
-        setUsers(res.data);
+        const data = res.data;
+
+        let usersArray = [];
+
+        // Check if API returned array directly
+        if (Array.isArray(data)) {
+          usersArray = data;
+        } else if (Array.isArray(data?.data)) {
+          usersArray = data.data;
+        } else {
+          usersArray = [];
+        }
+
+        setUsers(usersArray);
       } catch (err) {
         console.error('Failed to fetch users:', err);
+        setUsers([]); // Defensive: keep it an array
       }
     };
 
+    /**
+     * Fetch the bug details if editing.
+     */
     const fetchBug = async () => {
       try {
-        const res = await api.get(`/bugs/${id}`);
+        const res = await api.get(`/${id}`); // ✅ updated
         const data = res.data;
+
         setBug({
           title: data.title,
           description: data.description,
@@ -68,9 +91,9 @@ export default function BugForm() {
     try {
       if (isEdit) {
         if (!isEditable) return;
-        await api.put(`/bugs/${id}`, bug);
+        await api.put(`/${id}`, bug); // ✅ updated
       } else {
-        await api.post('/bugs', bug);
+        await api.post('/', bug); // ✅ updated
       }
 
       navigate('/bugs');
@@ -84,7 +107,7 @@ export default function BugForm() {
     if (!isEditable) return;
     if (window.confirm('Are you sure you want to delete this bug?')) {
       try {
-        await api.delete(`/bugs/${id}`);
+        await api.delete(`/${id}`); // ✅ updated
         navigate('/bugs');
       } catch (err) {
         console.error('Delete error:', err);
@@ -163,11 +186,12 @@ export default function BugForm() {
           disabled={isEdit && !isEditable}
         >
           <option value="">Unassigned</option>
-          {users.map((u) => (
-            <option key={u._id} value={u._id}>
-              {u.name} ({u.role})
-            </option>
-          ))}
+          {Array.isArray(users) &&
+            users.map((u) => (
+              <option key={u._id} value={u._id}>
+                {u.name} ({u.role})
+              </option>
+            ))}
         </select>
 
         <div className="form-buttons">
@@ -178,11 +202,7 @@ export default function BugForm() {
           ) : null}
 
           {isEdit && isEditable && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="delete-btn"
-            >
+            <button type="button" onClick={handleDelete} className="delete-btn">
               Delete Bug
             </button>
           )}
