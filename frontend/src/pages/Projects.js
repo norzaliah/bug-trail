@@ -83,6 +83,13 @@ export default function Projects() {
     return matchesPriority && matchesSearch;
   });
 
+  // 📊 Status breakdowns
+  const totalProjects = projects.length;
+  const activeCount = projects.filter((p) => p.status === 'Active').length;
+  const holdCount = projects.filter((p) => p.status === 'On Hold').length;
+  const completedCount = projects.filter((p) => p.status === 'Completed').length;
+  const archivedCount = projects.filter((p) => p.status === 'Archived').length;
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-content-wrapper">
@@ -110,23 +117,27 @@ export default function Projects() {
             </div>
           </div>
 
-          {/* 🟪 Status summary cards */}
+          {/* 🟪 Status summary cards + total */}
           <div className="widget-grid">
+            <div className="widget-card total">
+              <h3>Total Projects</h3>
+              <p>{totalProjects}</p>
+            </div>
             <div className="widget-card">
               <h3>Active</h3>
-              <p>{projects.filter((p) => p.status === 'Active').length}</p>
+              <p>{activeCount}</p>
             </div>
             <div className="widget-card">
               <h3>On Hold</h3>
-              <p>{projects.filter((p) => p.status === 'On Hold').length}</p>
+              <p>{holdCount}</p>
             </div>
             <div className="widget-card">
               <h3>Completed</h3>
-              <p>{projects.filter((p) => p.status === 'Completed').length}</p>
+              <p>{completedCount}</p>
             </div>
             <div className="widget-card">
               <h3>Archived</h3>
-              <p>{projects.filter((p) => p.status === 'Archived').length}</p>
+              <p>{archivedCount}</p>
             </div>
           </div>
 
