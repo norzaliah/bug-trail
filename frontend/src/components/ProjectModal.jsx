@@ -4,22 +4,27 @@ import '../styles/ProjectModal.css';
 export default function ProjectModal({ isOpen, onClose, onSave, initialData }) {
   const [formData, setFormData] = useState({
     name: '',
-    dueDate: '',
-    completed: '',
-    priority: '',
-    updated: '',
+    description: '',
+    status: 'Active',
+    endDate: '',
   });
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        name: initialData.name || '',
+        description: initialData.description || '',
+        status: initialData.status || 'Active',
+        endDate: initialData.endDate
+          ? new Date(initialData.endDate).toISOString().substring(0, 10)
+          : '',
+      });
     } else {
       setFormData({
         name: '',
-        dueDate: '',
-        completed: '',
-        priority: '',
-        updated: '',
+        description: '',
+        status: 'Active',
+        endDate: '',
       });
     }
   }, [initialData]);
@@ -31,8 +36,15 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
-    onClose(); // close modal after save
+
+    // Ensure empty date doesn't send empty string
+    const payload = {
+      ...formData,
+      endDate: formData.endDate ? new Date(formData.endDate) : null,
+    };
+
+    onSave(payload);
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -54,51 +66,37 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }) {
           </label>
 
           <label>
-            Due Date:
-            <input
-              type="date"
-              name="dueDate"
-              value={formData.dueDate}
+            Description:
+            <textarea
+              name="description"
+              value={formData.description}
               onChange={handleChange}
-              required
+              rows={3}
             />
           </label>
 
           <label>
-            Completed (%):
-            <input
-              type="number"
-              name="completed"
-              value={formData.completed}
-              onChange={handleChange}
-              min="0"
-              max="100"
-            />
-          </label>
-
-          <label>
-            Priority:
+            Status:
             <select
-              name="priority"
-              value={formData.priority}
+              name="status"
+              value={formData.status}
               onChange={handleChange}
               required
             >
-              <option value="">Select</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
+              <option value="Active">Active</option>
+              <option value="On Hold">On Hold</option>
+              <option value="Completed">Completed</option>
+              <option value="Archived">Archived</option>
             </select>
           </label>
 
           <label>
-            Last Updated:
+            Due Date:
             <input
-              type="text"
-              name="updated"
-              value={formData.updated}
+              type="date"
+              name="endDate"
+              value={formData.endDate}
               onChange={handleChange}
-              placeholder="e.g. Today 10:30 am"
             />
           </label>
 
