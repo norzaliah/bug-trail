@@ -65,6 +65,15 @@ const userService = {
   getUsers: () => api.get('/users'),
 };
 
+// Project-related API methods
+const projectService = {
+  getProjects: () => api.get('/projects'),
+  getProjectById: (id) => api.get(`/projects/${id}`),
+  createProject: (data) => api.post('/projects', data),
+  updateProject: (id, data) => api.patch(`/projects/${id}`, data),
+  deleteProject: (id) => api.delete(`/projects/${id}`),
+};
+
 // Export all services
-export { bugService, userService };
+export { bugService, userService, projectService };
 export default api;

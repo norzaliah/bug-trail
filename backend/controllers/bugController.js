@@ -45,10 +45,12 @@ exports.getBug = async (req, res, next) => {
 // @access  Private
 exports.createBug = async (req, res, next) => {
   try {
-    // Check if project exists
-    const project = await Project.findById(req.body.project);
-    if (!project) {
-      return res.status(404).json({ success: false, error: 'Project not found' });
+    // Only check if project provided
+    if (req.body.project) {
+      const project = await Project.findById(req.body.project);
+      if (!project) {
+        return res.status(404).json({ success: false, error: 'Project not found' });
+      }
     }
 
     // Check if assigned user exists (if provided)
@@ -61,7 +63,7 @@ exports.createBug = async (req, res, next) => {
 
     const bug = await Bug.create({
       ...req.body,
-      createdBy: req.user.id
+      createdBy: req.user.id,
     });
 
     res.status(201).json({ success: true, data: bug });

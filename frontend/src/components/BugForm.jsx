@@ -1,105 +1,121 @@
 // frontend/components/BugForm.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { bugService, userService, projectService  } from '../services/api';
 import '../styles/BugForm.css';
+import { useAuth } from '../context/AuthContext';
 
 export default function BugForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Determine if editing or creating a new bug
   const isEdit = Boolean(id);
   const isEditable = user && ['developer', 'tester'].includes(user.role);
 
-  // Form state for the bug fields
+  // Initial state (no change needed)
   const [bug, setBug] = useState({
-    title: '',
-    description: '',
-    priority: 'medium',
-    status: 'open',
-    dueDate: '',
-    owner: user?._id || '',
+    title: "",
+    description: "",
+    priority: "Medium",
+    status: "Open",
+    dueDate: "",
+    assignedTo: "",
+    project: "",
   });
 
-  const [users, setUsers] = useState([]); // Team users for assignment dropdown
-  const [error, setError] = useState(''); // Display errors in UI
+
+  const [users, setUsers] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    /**
-     * Fetch the list of users to assign bugs to.
-     */
-    const fetchUsers = async () => {
+    const fetchAll = async () => {
       try {
-        const res = await api.get('/users');
-        const data = res.data;
-
-        let usersArray = [];
-
-        // Check if API returned array directly
-        if (Array.isArray(data)) {
-          usersArray = data;
-        } else if (Array.isArray(data?.data)) {
-          usersArray = data.data;
-        } else {
-          usersArray = [];
-        }
-
-        setUsers(usersArray);
+        // fetch users
+        const resUsers = await userService.getUsers();
+        const userList = Array.isArray(resUsers.data)
+          ? resUsers.data
+          : Array.isArray(resUsers.data?.data)
+          ? resUsers.data.data
+          : [];
+        setUsers(userList);
       } catch (err) {
         console.error('Failed to fetch users:', err);
-        setUsers([]); // Defensive: keep it an array
+        setUsers([]);
       }
-    };
 
-    /**
-     * Fetch the bug details if editing.
-     */
-    const fetchBug = async () => {
       try {
-        const res = await api.get(`/${id}`); // ✅ updated
-        const data = res.data;
-
-        setBug({
-          title: data.title,
-          description: data.description,
-          priority: data.priority,
-          status: data.status,
-          dueDate: data.dueDate?.slice(0, 10),
-          owner: data.owner?._id || '',
-        });
+        // fetch projects
+        const resProjects = await projectService.getProjects(); // or use your project service if created
+        const projectList = Array.isArray(resProjects.data)
+          ? resProjects.data
+          : Array.isArray(resProjects.data?.data)
+          ? resProjects.data.data
+          : [];
+        setProjects(projectList);
       } catch (err) {
-        console.error('Failed to load bug:', err);
-        setError('Failed to load bug details.');
+        console.error('Failed to fetch projects:', err);
+        setProjects([]);
+      }
+
+      if (isEdit) {
+        try {
+          const res = await bugService.getBugById(id);
+          const data = res?.data?.data || res?.data;
+
+          setBug({
+            title: data.title || '',
+            description: data.description || '',
+            priority: data.priority || 'medium',
+            status: data.status || 'open',
+            dueDate: data.dueDate?.slice(0, 10) || '',
+            assignedTo: data.assignedTo?._id || '',
+            project: data.project?._id || '',
+          });
+        } catch (err) {
+          console.error('Failed to load bug:', err);
+          setError('Failed to load bug details.');
+        }
       }
     };
 
-    fetchUsers();
-    if (isEdit) fetchBug();
+    fetchAll();
   }, [id, isEdit]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setBug((prev) => ({ ...prev, [name]: value }));
+    setBug((prev) => ({
+      ...prev,
+      [name]: value || null,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      const payload = {
+        title: bug.title,
+        description: bug.description,
+        priority: bug.priority,
+        status: bug.status,
+        dueDate: bug.dueDate || null,
+        assignedTo: bug.assignedTo || null,
+        project: bug.project || null,
+      };
+
       if (isEdit) {
         if (!isEditable) return;
-        await api.put(`/${id}`, bug); // ✅ updated
+        await bugService.updateBug(id, payload);
       } else {
-        await api.post('/', bug); // ✅ updated
+        await bugService.createBug(payload);
       }
 
       navigate('/bugs');
     } catch (err) {
       console.error('Submission error:', err);
-      setError('Failed to submit bug.');
+      setError(err?.response?.data?.error || 'Failed to submit bug.');
     }
   };
 
@@ -107,7 +123,7 @@ export default function BugForm() {
     if (!isEditable) return;
     if (window.confirm('Are you sure you want to delete this bug?')) {
       try {
-        await api.delete(`/${id}`); // ✅ updated
+        await bugService.deleteBug(id);
         navigate('/bugs');
       } catch (err) {
         console.error('Delete error:', err);
@@ -150,10 +166,10 @@ export default function BugForm() {
           onChange={handleChange}
           disabled={isEdit && !isEditable}
         >
-          <option value="critical">Critical</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+          <option value="Critical">Critical</option>
         </select>
 
         <label>Status</label>
@@ -163,10 +179,11 @@ export default function BugForm() {
           onChange={handleChange}
           disabled={isEdit && !isEditable}
         >
-          <option value="open">Open</option>
-          <option value="in-progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-          <option value="closed">Closed</option>
+          <option value="Open">Open</option>
+          <option value="Active">Active</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Closed">Closed</option>
         </select>
 
         <label>Due Date</label>
@@ -180,18 +197,32 @@ export default function BugForm() {
 
         <label>Assign to</label>
         <select
-          name="owner"
-          value={bug.owner}
+          name="assignedTo"
+          value={bug.assignedTo}
           onChange={handleChange}
           disabled={isEdit && !isEditable}
         >
           <option value="">Unassigned</option>
-          {Array.isArray(users) &&
-            users.map((u) => (
-              <option key={u._id} value={u._id}>
-                {u.name} ({u.role})
-              </option>
-            ))}
+          {users.map((u) => (
+            <option key={u._id} value={u._id}>
+              {u.name} ({u.role})
+            </option>
+          ))}
+        </select>
+
+        <label>Project (Important)</label>
+        <select
+          name="project"
+          value={bug.project}
+          onChange={handleChange}
+          disabled={isEdit && !isEditable}
+        >
+          <option value="">None</option>
+          {projects.map((p) => (
+            <option key={p._id} value={p._id}>
+              {p.name}
+            </option>
+          ))}
         </select>
 
         <div className="form-buttons">
@@ -202,7 +233,11 @@ export default function BugForm() {
           ) : null}
 
           {isEdit && isEditable && (
-            <button type="button" onClick={handleDelete} className="delete-btn">
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="delete-btn"
+            >
               Delete Bug
             </button>
           )}
