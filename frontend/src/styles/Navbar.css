@@ -1,6 +1,6 @@
 /* Sidebar styles */
 .sidebar {
-  background-color: #ffffff90;
+  background-color: rgba(255, 255, 255, 0.9); /* Reduced transparency for better visibility */
   color: #fff;
   width: 250px;
   height: 100vh;
@@ -17,6 +17,13 @@
   z-index: 100;
   font-family: 'Segoe UI', sans-serif;
   transition: all 0.3s ease;
+  visibility: hidden; /* Sidebar is hidden by default on mobile */
+}
+
+/* Sidebar active class for showing it on mobile */
+.sidebar.active {
+  visibility: visible;
+  opacity: 1; /* Ensure sidebar is fully visible */
 }
 
 /* Sidebar logo */
@@ -138,7 +145,8 @@
     top: 0;
     height: 100vh;
     width: 100%;
-    background-color: #ffffff90;
+    background-color: rgba(255, 255, 255, 0.95); /* Less transparent for better visibility */
+    visibility: visible;
   }
 
   .sidebar-logo {
