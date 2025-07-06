@@ -193,6 +193,7 @@
 .status.open { background: #fdcb6e; }
 .status.closed { background: #d63031; }
 .status.resolved { background: #e17055; }
+.status.completed { background: #f6479e; }
 
 /* ------------------ Bug Filters ------------------ */
 .bug-filters {

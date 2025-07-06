@@ -202,7 +202,7 @@ export default function BugForm() {
           onChange={handleChange}
           disabled={isEdit && !isEditable}
         >
-          <option value="">Unassigned</option>
+          <option value="">Assigned</option>
           {users.map((u) => (
             <option key={u._id} value={u._id}>
               {u.name} ({u.role})

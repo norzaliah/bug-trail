@@ -17,7 +17,7 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [filter, setFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All'); // ✅ changed to status filter
   const [searchTerm, setSearchTerm] = useState('');
 
   // 📦 Load projects from the API on first render
@@ -58,6 +58,8 @@ export default function Projects() {
       console.error('❌ Failed to save project:', error);
     } finally {
       setModalOpen(false);
+
+      window.location.reload();
     }
   };
 
@@ -74,13 +76,29 @@ export default function Projects() {
     }
   };
 
+  // 🧩 Generate filter buttons for status
+  const renderStatusFilters = () => {
+    const statusLevels = ['All', 'Active', 'On Hold', 'Completed', 'Archived'];
+    return statusLevels.map((level) => (
+      <button
+        key={level}
+        className={statusFilter === level ? 'active-filter' : ''}
+        onClick={() => setStatusFilter(level)}
+      >
+        {level}
+      </button>
+    ));
+  };
+
   // 🔍 Filter + search logic
   const filteredProjects = projects.filter((proj) => {
-    const matchesPriority =
-      filter === 'All' || proj.priority === filter; // priority is optional in backend
+    const matchesStatus =
+      statusFilter === 'All' || proj.status === statusFilter;
+
     const matchesSearch =
       proj.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesPriority && matchesSearch;
+
+    return matchesStatus && matchesSearch;
   });
 
   // 📊 Status breakdowns
@@ -141,17 +159,9 @@ export default function Projects() {
             </div>
           </div>
 
-          {/* 🧭 Priority filters (optional UI if you support priority field) */}
+          {/* ✅ Status Filters */}
           <div className="project-filters">
-            {['All', 'High', 'Medium', 'Low'].map((level) => (
-              <button
-                key={level}
-                className={filter === level ? 'active-filter' : ''}
-                onClick={() => setFilter(level)}
-              >
-                {level}
-              </button>
-            ))}
+            {renderStatusFilters()}
           </div>
 
           {/* 📋 Project Table */}
@@ -164,7 +174,9 @@ export default function Projects() {
             {loading ? (
               <p>Loading projects...</p>
             ) : error ? (
-              <p style={{ color: 'red' }}>❌ Failed to load projects. Please try again later.</p>
+              <p style={{ color: 'red' }}>
+                ❌ Failed to load projects. Please try again later.
+              </p>
             ) : filteredProjects.length === 0 ? (
               <p style={{ opacity: 0.6 }}>📭 No projects yet.</p>
             ) : (
@@ -220,10 +232,18 @@ export default function Projects() {
             <div className="modal-overlay">
               <div className="modal-content">
                 <h3>Project Details</h3>
-                <p><b>Name:</b> {selectedProject.name}</p>
-                <p><b>Description:</b> {selectedProject.description}</p>
-                <p><b>Status:</b> {selectedProject.status}</p>
-                <p><b>Due Date:</b> {selectedProject.endDate}</p>
+                <p>
+                  <b>Name:</b> {selectedProject.name}
+                </p>
+                <p>
+                  <b>Description:</b> {selectedProject.description}
+                </p>
+                <p>
+                  <b>Status:</b> {selectedProject.status}
+                </p>
+                <p>
+                  <b>Due Date:</b> {selectedProject.endDate}
+                </p>
                 <button
                   onClick={() => setSelectedProject(null)}
                   className="add-btn"
@@ -246,3 +266,5 @@ export default function Projects() {
     </div>
   );
 }
+
+
