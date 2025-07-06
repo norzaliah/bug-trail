@@ -1,8 +1,8 @@
-/* Navbar.css */
+/* Sidebar styles */
 .sidebar {
   background-color: #ffffff90;
   color: #fff;
-  width: 200px;
+  width: 250px;
   height: 100vh;
   padding: 2rem 1rem;
   position: fixed;
@@ -16,8 +16,10 @@
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
   z-index: 100;
   font-family: 'Segoe UI', sans-serif;
+  transition: all 0.3s ease;
 }
 
+/* Sidebar logo */
 .sidebar-logo {
   font-size: 1.8rem;
   font-weight: bold;
@@ -26,6 +28,7 @@
   text-align: center;
 }
 
+/* Sidebar navigation links */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -52,6 +55,7 @@
   font-weight: bold;
 }
 
+/* Sidebar footer */
 .sidebar-footer {
   margin-top: 2rem;
   padding-top: 1rem;
@@ -59,6 +63,7 @@
   text-align: center;
 }
 
+/* User info and logout button */
 .user-info {
   font-size: 0.85rem;
   margin-bottom: 0.5rem;
@@ -78,4 +83,93 @@
 
 .logout-btn:hover {
   background-color: #9C27B0;
+}
+
+/* Media Queries for Responsiveness */
+
+/* Desktop screens */
+@media (min-width: 1024px) {
+  .sidebar {
+    width: 250px; /* Sidebar size for desktop */
+  }
+
+  .sidebar-logo {
+    font-size: 2rem; /* Larger logo for desktop */
+  }
+
+  .sidebar-nav a {
+    font-size: 1rem;
+  }
+}
+
+/* Tablet screens */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .sidebar {
+    width: 220px; /* Sidebar size for tablet */
+    padding: 1.5rem 1rem;
+  }
+
+  .sidebar-logo {
+    font-size: 1.5rem; /* Smaller logo for tablet */
+  }
+
+  .sidebar-nav a {
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile screens */
+@media (max-width: 767px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 1rem;
+    display: none; /* Hide sidebar on mobile by default */
+  }
+
+  /* Show sidebar on mobile when active */
+  .sidebar.active {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    background-color: #ffffff90;
+  }
+
+  .sidebar-logo {
+    font-size: 1.4rem;
+    text-align: left;
+  }
+
+  .sidebar-nav a {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  .sidebar-footer {
+    display: none; /* Hide footer in mobile view */
+  }
+
+  .logout-btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  /* Hamburger menu styles */
+  .hamburger-menu {
+    display: block;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    color: #663399;
+    cursor: pointer;
+  }
 }
