@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const allowedOrigins = ['https://bug-trail-omega.vercel.app'];
+
 const { errorHandler } = require('./middlewares/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
 const bugRoutes = require('./routes/bugRoutes');
@@ -11,7 +13,10 @@ const userRoutes = require('./routes/userRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+}));
+
 app.use(express.json());
 
 // Database connection
